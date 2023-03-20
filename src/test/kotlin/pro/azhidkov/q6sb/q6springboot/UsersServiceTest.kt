@@ -6,7 +6,10 @@ import org.hamcrest.MatcherAssert
 import org.junit.Assume
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.jdbc.Sql
 import pro.azhidkov.q6sb.q6springboot.app.RegisterRequest
@@ -15,8 +18,13 @@ import pro.azhidkov.q6sb.q6springboot.domain.Role
 import pro.azhidkov.q6sb.q6springboot.core.users.UsersService
 
 
+@Import(CoreConfig::class)
+@Configuration
+@EntityScan("pro.azhidkov.q6sb.q6springboot.domain")
+class UsersTestConfig
+
 @ContextConfiguration(
-    classes = [CoreConfig::class],
+    classes = [UsersTestConfig::class],
     initializers = [TestContainerDbContextInitializer::class]
 )
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
