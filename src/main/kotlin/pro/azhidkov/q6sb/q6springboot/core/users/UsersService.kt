@@ -1,6 +1,7 @@
 package pro.azhidkov.q6sb.q6springboot.core.users
 
 import jakarta.transaction.Transactional
+import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
@@ -12,10 +13,14 @@ import pro.azhidkov.q6sb.q6springboot.app.RegisterRequest
 import pro.azhidkov.q6sb.q6springboot.domain.Role
 import pro.azhidkov.q6sb.q6springboot.domain.User
 
+
+const val USER_REGISTERED_EVENTS_QUEUE = "UserRegistered"
+
 @Service
 class UsersService(
     private val usersRepo: UsersRepo,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val rabbitTemplate: RabbitTemplate
 ) : UserDetailsService {
 
     @Transactional
@@ -39,6 +44,9 @@ class UsersService(
                 emptySet()
             )
         )
+
+        rabbitTemplate.convertAndSend(USER_REGISTERED_EVENTS_QUEUE, UserRegisteredEvent(user.id.toString()))
+
         return user.id
     }
 

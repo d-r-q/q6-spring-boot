@@ -25,9 +25,6 @@ class AuthenticationCases {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    @Autowired
-    private lateinit var usersService: UsersService
-
     @Test
     fun `When unauthenticated user opens login page, login page should be returned`() {
         val bodyStr = mockMvc.get("/login")

@@ -1,12 +1,9 @@
 package pro.azhidkov.q6sb.q6springboot
 
-import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.testcontainers.containers.PostgreSQLContainer
-import java.sql.DriverManager
-import java.sql.SQLException
 
 val pgContainer: PostgreSQLContainer<*> by lazy {
     PostgreSQLContainer("postgres:15")
