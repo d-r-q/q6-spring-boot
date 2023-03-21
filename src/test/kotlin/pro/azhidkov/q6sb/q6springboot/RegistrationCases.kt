@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 
 @ContextConfiguration(
-    classes = [UsersTestConfig::class],
+    classes = [Q6SpringBootApplication::class],
     initializers = [TestContainerDbContextInitializer::class, TestContainerRmqContextInitializer::class]
 )
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
