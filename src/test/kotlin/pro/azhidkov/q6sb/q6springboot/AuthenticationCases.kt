@@ -11,8 +11,6 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
-import pro.azhidkov.q6sb.q6springboot.core.users.UsersService
-
 
 @ContextConfiguration(
     classes = [Q6SpringBootApplication::class],
@@ -38,7 +36,6 @@ class AuthenticationCases {
         }
     }
 
-
     @Test
     fun `When unauthenticated user opens restricted page, he should be redirected to login page`() {
         mockMvc.get("/app/main")
@@ -61,6 +58,22 @@ class AuthenticationCases {
         val body = Jsoup.parse(bodyStr)
         Assertions.assertThatSpec(body) {
             this.node("#overview") { containsText("Обзор финансовых дел") }
+        }
+    }
+
+    @Test
+    @WithUserDetails("asergeev@ya.ru")
+    @Sql("/db/insert-user.sql")
+    fun `When authenticated user opens login page, login page should be returned`() {
+        val bodyStr = mockMvc.get("/login")
+            .andExpect {
+                status { is2xxSuccessful() }
+            }
+            .andReturn().response.contentAsString
+
+        val body = Jsoup.parse(bodyStr)
+        Assertions.assertThatSpec(body) {
+            node("#loginForm") { exists() }
         }
     }
 

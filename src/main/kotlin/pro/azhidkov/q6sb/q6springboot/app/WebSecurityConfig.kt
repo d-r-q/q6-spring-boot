@@ -26,7 +26,7 @@ class WebSecurityConfig(
             .authorizeHttpRequests { authz ->
                 authz
                     .requestMatchers("/app/**").hasAuthority(Role.ROLE_USER.name)
-                    .requestMatchers("/**").anonymous()
+                    .requestMatchers("/**").permitAll()
             }
             .formLogin()
             .loginPage("/login")
