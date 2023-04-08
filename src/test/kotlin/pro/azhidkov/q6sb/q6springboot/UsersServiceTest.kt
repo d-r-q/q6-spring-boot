@@ -18,8 +18,8 @@ import org.springframework.context.annotation.Import
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.jdbc.Sql
-import pro.azhidkov.q6sb.q6springboot.app.RegisterRequest
 import pro.azhidkov.q6sb.q6springboot.core.CoreConfig
+import pro.azhidkov.q6sb.q6springboot.core.users.RegisterRequest
 import pro.azhidkov.q6sb.q6springboot.core.users.USER_REGISTERED_EVENTS_QUEUE
 import pro.azhidkov.q6sb.q6springboot.core.users.UserRegisteredEvent
 import pro.azhidkov.q6sb.q6springboot.domain.Role

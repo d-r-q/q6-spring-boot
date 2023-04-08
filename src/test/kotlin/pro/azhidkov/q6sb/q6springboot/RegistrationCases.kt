@@ -25,7 +25,7 @@ class RegistrationCases {
 
     @Test
     fun `Unauthorized user should have access to registration page`() {
-        val bodyStr = mockMvc.get("/registration")
+        val bodyStr = mockMvc.get("/register")
             .andExpect {
                 status { is2xxSuccessful() }
             }
@@ -36,6 +36,18 @@ class RegistrationCases {
         }
     }
 
+    @Test
+    fun `Successful registration page should contains corresponding message`() {
+        val bodyStr = mockMvc.get("/successful-registration")
+            .andExpect {
+                status { is2xxSuccessful() }
+            }
+            .andReturn().response.contentAsString
+        val body = Jsoup.parse(bodyStr)
+        Assertions.assertThatSpec(body) {
+            node("#registrationSuccess") { exists() }
+        }
+    }
 
     @Test
     fun `User should be able to login after registration`() {
@@ -44,20 +56,13 @@ class RegistrationCases {
         val pass = "password"
 
         // When
-        val registerResponse = mockMvc.post("/register") {
+        mockMvc.post("/register") {
             contentType = MediaType.APPLICATION_FORM_URLENCODED
             param("email", email)
             param("password", pass)
             param("name", "Irrelevant")
         }.andExpect {
-            status { is2xxSuccessful() }
-        }
-            .andReturn().response.contentAsString
-
-
-        // Then
-        Assertions.assertThatSpec(Jsoup.parse(registerResponse)) {
-            node("#registrationSuccess") { exists() }
+            status { is3xxRedirection() }
         }
 
         // And when/then
