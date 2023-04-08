@@ -11,6 +11,8 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import pro.azhidkov.q6sb.q6springboot.core.users.RegisterRequest
+import pro.azhidkov.q6sb.q6springboot.core.users.UsersService
 
 @ContextConfiguration(
     classes = [Q6SpringBootApplication::class],
@@ -22,6 +24,9 @@ class RegistrationCases {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
+
+    @Autowired
+    private lateinit var usersService: UsersService
 
     @Test
     fun `Unauthorized user should have access to registration page`() {
@@ -73,6 +78,35 @@ class RegistrationCases {
         }.andExpect {
             status { isFound() }
             header { string("Location", "/app/main") }
+        }
+    }
+
+
+    @Test
+    fun `When registration form with registered email submitted, then fragment with error message should be returned`() {
+        // Given
+        val theEmail = "test@ya.ru"
+        val password = "password"
+        val name = "name"
+        usersService.register(RegisterRequest(theEmail, password, name))
+
+        // When
+        val reregisterResponse = mockMvc.post("/register") {
+            contentType = MediaType.APPLICATION_FORM_URLENCODED
+            param("email", theEmail)
+            param("password", password)
+            param("name", name)
+        }.andExpect {
+            status { is2xxSuccessful() }
+        }
+            .andReturn().response.contentAsString
+
+        // Then
+        Assertions.assertThatSpec(Jsoup.parse(reregisterResponse)) {
+            node("input#emailInput.is-invalid") { exists() }
+            node("input#nameInput") { attribute("value") { hasText(name) } }
+            node("input#emailInput") { attribute("value") { hasText(theEmail) } }
+            node("input#passwordInput") { attribute("value") { hasText(password) } }
         }
     }
 

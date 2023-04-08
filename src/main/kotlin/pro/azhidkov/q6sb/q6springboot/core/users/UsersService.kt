@@ -2,6 +2,7 @@ package pro.azhidkov.q6sb.q6springboot.core.users
 
 import jakarta.transaction.Transactional
 import org.springframework.amqp.rabbit.core.RabbitTemplate
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
@@ -33,17 +34,25 @@ class UsersService(
 
     @Transactional
     fun register(registerRequest: RegisterRequest): Long {
-        val user = usersRepo.save(
-            User(
-                0,
-                registerRequest.email,
-                registerRequest.name,
-                passwordEncoder.encode(registerRequest.password),
-                arrayOf(Role.ROLE_USER),
-                emptySet()
+        val res = Result.runCatching {
+            usersRepo.save(
+                User(
+                    0,
+                    registerRequest.email,
+                    registerRequest.name,
+                    passwordEncoder.encode(registerRequest.password),
+                    arrayOf(Role.ROLE_USER),
+                    emptySet()
+                )
             )
-        )
+        }
 
+        when (val ex = res.exceptionOrNull()) {
+            is DataIntegrityViolationException -> throw DuplicatedEmail(registerRequest.email, res.exceptionOrNull()!!)
+            is Throwable -> throw ex
+        }
+
+        val user = res.getOrThrow()
         rabbitTemplate.convertAndSend(USER_REGISTERED_EVENTS_QUEUE, UserRegisteredEvent(user.id.toString()))
 
         return user.id

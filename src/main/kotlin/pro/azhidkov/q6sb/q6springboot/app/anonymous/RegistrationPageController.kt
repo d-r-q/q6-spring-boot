@@ -1,15 +1,14 @@
 package pro.azhidkov.q6sb.q6springboot.app.anonymous
 
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.servlet.ModelAndView
+import pro.azhidkov.q6sb.q6springboot.core.users.DuplicatedEmail
 import pro.azhidkov.q6sb.q6springboot.core.users.RegisterRequest
 import pro.azhidkov.q6sb.q6springboot.core.users.UsersService
+import pro.azhidkov.q6sb.q6springboot.platform.kotlin.throwIt
 
 @Controller
 class RegistrationPageController(
@@ -19,14 +18,22 @@ class RegistrationPageController(
     @GetMapping("/register")
     fun getRegistrationPage(): ModelAndView {
         return ModelAndView("register")
+            .addObject("model", RegisterRequest("", "", ""))
+            .addObject("duplicatedEmail", false)
     }
 
     @PostMapping("/register")
-    fun register(@ModelAttribute registerRequest: RegisterRequest): ResponseEntity<Unit> {
-        usersService.register(registerRequest)
-        return ResponseEntity.status(HttpStatus.FOUND)
-            .header("Location", "successful-registration")
-            .build()
+    fun register(@ModelAttribute registerRequest: RegisterRequest): ModelAndView {
+        val res = Result.runCatching { usersService.register(registerRequest) }
+        return when {
+            res.isSuccess -> ModelAndView("redirect:successful-registration")
+
+            res.exceptionOrNull() is DuplicatedEmail -> ModelAndView("register :: form")
+                .addObject("model", registerRequest)
+                .addObject("duplicatedEmail", true)
+
+            else -> res.throwIt()
+        }
     }
 
     @GetMapping("/successful-registration")
